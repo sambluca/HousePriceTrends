@@ -39,6 +39,11 @@ public class House {
 	public String getDate() {
 		return date;
 	}
+
+	public int getYear() {
+		String sellDate = getDate();
+		return Integer.parseInt(sellDate.substring(0, 4));
+	}
 	public void setDate(String date) {
 		this.date = date.substring(0,10);
 	}

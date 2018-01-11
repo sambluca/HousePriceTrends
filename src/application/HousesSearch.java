@@ -10,11 +10,11 @@ public class HousesSearch{
 			House h = new House();
 			h.setId(housesData.getString("id"));
 			h.setPrice(housesData.getInt("price"));
-			h.setDate(housesData.getString("date"));
+			h.setDate(housesData.getString("sale_date"));
 			h.setPostcode(housesData.getString("postcode"));
-			h.setPropType(housesData.getString("propType").charAt(0));
-			h.setNewBuild(housesData.getString("newBuild").charAt(0));
-			h.setLeaseType(housesData.getString("leaseType").charAt(0));
+			h.setPropType(housesData.getString("prop_type").charAt(0));
+			h.setNewBuild(housesData.getString("newbuild").charAt(0));
+			h.setLeaseType(housesData.getString("leasetype").charAt(0));
 			h.setPaon(housesData.getString("paon"));
 			h.setSaon(housesData.getString("saon"));
 			h.setStreet(housesData.getString("street"));
@@ -29,14 +29,14 @@ public class HousesSearch{
 	}
 	
 	
-	public static ResultSet getResults(String searchTerm) {
+	public static ResultSet getResultsFromDB(String searchTerm) {
 		houses.clear();
 		Connection c = null;
 		ResultSet housesData = null;
 		try {
 			//connect to db
-			c = DriverManager.getConnection("jdbc:sqlite:houseprices.db");
-			
+			c = DriverManager.getConnection("jdbc:sqlite:" + Index.path.getPath());
+
 			//run query
 			PreparedStatement s = c.prepareStatement("SELECT * FROM houses WHERE postcode LIKE ?");
 			s.setString(1, searchTerm);
@@ -47,11 +47,10 @@ public class HousesSearch{
 		}
 		
 		return housesData;
-		
 	}
 	
 	public static ArrayList<House> noFilterSearch(String searchTerm) throws SQLException {
-		ResultSet housesData= getResults(searchTerm);
+		ResultSet housesData= getResultsFromDB(searchTerm);
 		
 		while(housesData.next()) {
 			buildHouseArray(housesData);
@@ -60,7 +59,7 @@ public class HousesSearch{
 	}
 	
 	public static ArrayList<House> maxPriceSearch(String searchTerm, int maxPrice) throws SQLException {
-		ResultSet housesData= getResults(searchTerm);
+		ResultSet housesData= getResultsFromDB(searchTerm);
 		
 		while(housesData.next()) {
 			if(housesData.getInt("price") <= maxPrice) {
@@ -73,7 +72,7 @@ public class HousesSearch{
 	
 	
 	public static ArrayList<House> minPriceSearch(String searchTerm, int minPrice) throws SQLException {
-		ResultSet housesData= getResults(searchTerm);
+		ResultSet housesData= getResultsFromDB(searchTerm);
 		
 		while(housesData.next()) {
 			if(housesData.getInt("price") >= minPrice) {
@@ -85,14 +84,10 @@ public class HousesSearch{
 	}
 	
 	public static ArrayList<House> houseNoSearch(String searchTerm, String houseNumber) throws SQLException {
-		ResultSet housesData= getResults(searchTerm);
+		ResultSet housesData= getResultsFromDB(searchTerm);
 		
 		while(housesData.next()) {
-			System.out.println("PAON " + housesData.getString("paon"));
-			System.out.println("passed " + houseNumber);
-			System.out.println("COMPARE " + housesData.getString("paon").equals(houseNumber));
 			if(housesData.getString("paon").equals(houseNumber)) {
-				System.out.println("HERE");
 				buildHouseArray(housesData);				
 			}
 		}

@@ -1,52 +1,60 @@
 package application;
 
 import java.awt.Container;
-import java.awt.Dimension;
-import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.sql.SQLException;
 import java.util.ArrayList;
-
+import java.sql.SQLException;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
-import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 
 public class Index {
+	public static PathToDB path = new PathToDB();
 	public static void main(String[] args) {
-		UserInterface();
+		EnterPathDB();
 	}
+	
+	private static ArrayList<House> housesArray = null;
 	
 	private static Object[] columnNames = {"Date", "Price", "No", "Road", "Postcode"};
 	private static TableModel emptyTableModel = new DefaultTableModel(null, columnNames);
-	
 	private static JTable table = new JTable(emptyTableModel);
-
-	private static JFrame s = new JFrame("House Price Trends!");
+	
+	
+	private static JFrame graphFrame = new JFrame("Trends graph!");
+	private static Container graphCont = graphFrame.getContentPane();
+	
+	private static JFrame s = new JFrame("Please enter a path!");
 	private static Container d = s.getContentPane();
+
 	private static JPanel p = new JPanel(new GridBagLayout());
 	private static JPanel sp = new JPanel(new GridBagLayout());
 	private static JPanel fp = new JPanel(new GridBagLayout());
 
 
 	private static JButton button = new JButton("Search");
+	private static JButton pathButton = new JButton("Submit");
+	private static JButton showGraph = new JButton("Graph");
+
 	private static JTextField searchBar= new JTextField(12);
 	private static JTextField houseNumberFilter= new JTextField(3);
 	private static JTextField minPriceFilter= new JTextField(7);
 	private static JTextField maxPriceFilter= new JTextField(7);
 
 	private static ButtonGroup filters = new ButtonGroup();
+
 	private static JRadioButton noFilters = new JRadioButton("Search Postcodes only"); 
 	private static JRadioButton houseNo = new JRadioButton("House Number"); 
 	private static JRadioButton maxPrice = new JRadioButton("Max Price"); 
@@ -62,63 +70,63 @@ public class Index {
 	        return false;
 	    }
 	}
-
 	
-	@SuppressWarnings("serial")
 	private static void buttonAction() throws SQLException {
-		String userInput = searchBar.getText().replaceAll("\\s","");
+		String userInput = searchBar.getText();
 		String filterChoice = filters.getSelection().getActionCommand();
-
-		ArrayList<House> houses = null;
-		if(filterChoice == "noFilters") {
-			houses = HousesSearch.noFilterSearch(userInput);
-		}
 		
-		if(isStringValidInteger(maxPriceFilter.getText()) && filterChoice =="maxPrice") {
-			int maxPrice = Integer.parseInt(maxPriceFilter.getText());
-			
-			houses = HousesSearch.maxPriceSearch(userInput, maxPrice);
-		}
-		
-		if(isStringValidInteger(minPriceFilter.getText()) && filterChoice =="minPrice") {
-			int minPrice = Integer.parseInt(minPriceFilter.getText());
-			
-			houses = HousesSearch.minPriceSearch(userInput, minPrice);
-		}
-		
-		if(filterChoice =="houseNo") {
-			String houseNo = houseNumberFilter.getText();
-			houses = HousesSearch.houseNoSearch(userInput, houseNo);
-		}
-
-
-
-		
-
-		Object[][] rowData = null;
-
-		if(houses == null || houses.size() == 0 ) {
-			
+		if(userInput.equals(null) || userInput.equals("")) {
+			JOptionPane.showMessageDialog(d, "Please enter a path!");
 		} else {
-			rowData = new Object[houses.size()][5];
-			for(int i = 0; i < houses.size(); i++) {
-				rowData[i][0] = houses.get(i).getDate();
-				rowData[i][1] = "£" + houses.get(i).getPrice();
-				rowData[i][2] = houses.get(i).getPaon();
-				rowData[i][3] = houses.get(i).getStreet();
-				rowData[i][4] = houses.get(i).getPostcode();
+			housesArray = null;
+	
+			if(filterChoice == "noFilters") {
+				housesArray = HousesSearch.noFilterSearch(userInput);
 			}
-		}
-		
-		TableModel tableModel = new DefaultTableModel(rowData, columnNames)
-				{
-					public boolean isCellEditable(int row, int column)
+			
+			if(isStringValidInteger(maxPriceFilter.getText()) && filterChoice =="maxPrice") {
+				int maxPrice = Integer.parseInt(maxPriceFilter.getText());
+				
+				housesArray = HousesSearch.maxPriceSearch(userInput, maxPrice);
+			}
+			
+			if(isStringValidInteger(minPriceFilter.getText()) && filterChoice =="minPrice") {
+				int minPrice = Integer.parseInt(minPriceFilter.getText());
+				
+				housesArray = HousesSearch.minPriceSearch(userInput, minPrice);
+			}
+			
+			if(filterChoice =="houseNo") {
+				String houseNo = houseNumberFilter.getText();
+				housesArray = HousesSearch.houseNoSearch(userInput, houseNo);
+			}
+	
+			Object[][] rowData = null;
+	
+			if(housesArray == null || housesArray.size() == 0 ) {
+				JOptionPane.showMessageDialog(d, "No data found!");
+			} else {
+				rowData = new Object[housesArray.size()][5];
+				for(int i = 0; i < housesArray.size(); i++) {
+					rowData[i][0] = housesArray.get(i).getDate();
+					rowData[i][1] = "£" + housesArray.get(i).getPrice();
+					rowData[i][2] = housesArray.get(i).getPaon();
+					rowData[i][3] = housesArray.get(i).getStreet();
+					rowData[i][4] = housesArray.get(i).getPostcode();
+				}
+				showGraph.setEnabled(true);
+			}
+			
+			TableModel tableModel = new DefaultTableModel(rowData, columnNames)
 					{
-						return false;
-					}
-				};
-		
-		table.setModel(tableModel);
+						public boolean isCellEditable(int row, int column)
+						{
+							return false;
+						}
+					};
+			
+			table.setModel(tableModel);
+		}
 	}
 
 	
@@ -126,12 +134,11 @@ public class Index {
 		GridBagConstraints bc = new GridBagConstraints();
 		bc.gridx = 1;
 		bc.gridy = 0;
+
 		return bc;
 	}
 	private static GridBagConstraints searchCons() {
 		GridBagConstraints sc = new GridBagConstraints();
-		sc.fill = GridBagConstraints.HORIZONTAL;
-
 		sc.gridy = 0;
 		sc.gridx = 0;
 
@@ -148,7 +155,6 @@ public class Index {
 	private static GridBagConstraints filtCons() {
 		GridBagConstraints fc = new GridBagConstraints();
 		fc.fill = GridBagConstraints.HORIZONTAL;
-
 		fc.gridy = 2;
 		fc.gridx = 0;
 
@@ -158,7 +164,6 @@ public class Index {
 	private static GridBagConstraints radioButtonCons(int yPos) {
 		GridBagConstraints rc = new GridBagConstraints();
 		rc.fill = GridBagConstraints.HORIZONTAL;
-
 		rc.gridy = yPos;
 		rc.gridx = 0;
 
@@ -167,8 +172,8 @@ public class Index {
 	
 	private static GridBagConstraints layout(int yPos) {
 		GridBagConstraints rc = new GridBagConstraints();
-//		rc.fill = GridBagConstraints.HORIZONTAL;
 		rc.gridy = yPos;
+		
 		return rc;
 	}
 	
@@ -185,6 +190,8 @@ public class Index {
 
 
 	private static void UserInterface() {
+		d.setLayout(new GridBagLayout());
+		
 		maxPrice.setActionCommand("maxPrice");
 		minPrice.setActionCommand("minPrice");
 		houseNo.setActionCommand("houseNo");
@@ -195,7 +202,7 @@ public class Index {
 		filters.add(houseNo);
 		filters.add(noFilters);
 		noFilters.setSelected(true);
-		d.setLayout(new GridBagLayout());
+
 		
 		sp.add(searchBar, searchCons());
 		sp.add(button, buttonCons());
@@ -208,10 +215,12 @@ public class Index {
 		fp.add(maxPriceFilter, filterInputCons(5, 1));
 		fp.add(minPrice, radioButtonCons(6));
 		fp.add(minPriceFilter, filterInputCons(6, 1));
+		fp.add(showGraph,filterInputCons(7,0));
+		showGraph.setEnabled(false);
 
-		
 		p.add(sp, layout(0));
 		p.add(fp, layout(1));
+
 		d.add(scrollPane);
 		d.add(p, panelCons());
 		
@@ -220,17 +229,62 @@ public class Index {
 				try {
 					buttonAction();
 				} catch (SQLException e1) {
-					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				}			
 			}
 		});
+		
+		showGraph.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				new Thread(){
+                    @Override
+                    public void run() {
+                        try {
+                        	
+            				graphCont.add(TrendsGraph.createGraph(housesArray));
+            				graphFrame.setVisible(true);	
+            				graphFrame.pack();
+            				graphFrame.setResizable(false);
+            				graphFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+                        } catch (Exception e) {
+                            //what to do when it fails
+                            e.printStackTrace();
+                        }
+                    }
+                }.start();
+
+				
+			}
+		});
+
 		s.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		s.pack();
 		s.setResizable(false);
 		s.setVisible(true);
-
 	}
-
-
+	
+	private static void EnterPathDB() {
+		sp.add(searchBar, searchCons());
+		sp.add(pathButton, buttonCons());
+		d.add(sp);
+		pathButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+					String pathDB = searchBar.getText();
+					searchBar.setText("");
+					if(pathDB.equals(null) || pathDB.equals("")) {
+						JOptionPane.showMessageDialog(d, "Please enter a path!");
+					} else {
+						path.setPath(pathDB);
+						sp.remove(searchBar);
+						sp.remove(pathButton);
+						d.remove(sp);
+						s.setTitle("House Price Trends!");
+						UserInterface();						
+					}
+			}
+		});
+		s.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		s.pack();
+		s.setVisible(true);
+	}
 }
