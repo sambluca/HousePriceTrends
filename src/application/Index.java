@@ -76,7 +76,7 @@ public class Index {
 		String filterChoice = filters.getSelection().getActionCommand();
 		
 		if(userInput.equals(null) || userInput.equals("")) {
-			JOptionPane.showMessageDialog(d, "Please enter a path!");
+			JOptionPane.showMessageDialog(d, "Please enter a postcode!");
 		} else {
 			housesArray = null;
 	
@@ -104,7 +104,7 @@ public class Index {
 			Object[][] rowData = null;
 	
 			if(housesArray == null || housesArray.size() == 0 ) {
-				JOptionPane.showMessageDialog(d, "No data found!");
+				JOptionPane.showMessageDialog(d, "No data found! Either we don't have this data or the postcode was incorrect.\nIf you chose to filter the results further please make sure you entered what you want to filter by.");
 			} else {
 				rowData = new Object[housesArray.size()][5];
 				for(int i = 0; i < housesArray.size(); i++) {
@@ -207,7 +207,7 @@ public class Index {
 		sp.add(searchBar, searchCons());
 		sp.add(button, buttonCons());
 
-		fp.add(new JLabel("Filters"), filtCons());
+		fp.add(new JLabel("Filter search further!"), filtCons());
 		fp.add(noFilters, radioButtonCons(3));
 		fp.add(houseNo, radioButtonCons(4));
 		fp.add(houseNumberFilter, filterInputCons(4, 1));
@@ -240,7 +240,7 @@ public class Index {
                     @Override
                     public void run() {
                         try {
-                        	
+                        	graphCont.removeAll();
             				graphCont.add(TrendsGraph.createGraph(housesArray));
             				graphFrame.setVisible(true);	
             				graphFrame.pack();

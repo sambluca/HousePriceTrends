@@ -11,7 +11,7 @@ import org.jfree.data.xy.XYSeriesCollection;
 
 public class TrendsGraph {
 	public static ChartPanel createGraph(ArrayList<House> houses) throws ParseException {
-		XYSeries series = new XYSeries("Price Trends!");
+		XYSeries series = new XYSeries("Sale");
 	    XYSeriesCollection dataset = new XYSeriesCollection();
 
 		for(House house : houses) {
@@ -22,7 +22,7 @@ public class TrendsGraph {
 		
 	    dataset.addSeries(series);
 
-		   JFreeChart chart = ChartFactory.createScatterPlot("Price trends", "Date", "Price (£)", dataset);
+		   JFreeChart chart = ChartFactory.createScatterPlot(houses.get(0).getPostcode() + " Price trends", "Date (Year)", "Price (£)", dataset);
 		   ChartPanel CP = new ChartPanel(chart);
 
 		return CP;
