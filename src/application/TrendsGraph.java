@@ -9,23 +9,40 @@ import org.jfree.chart.JFreeChart;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 
+/**
+ * 
+ * @author tramog01
+ *Class for a sales price trends graph
+ */
 public class TrendsGraph {
-	public static ChartPanel createGraph(ArrayList<House> houses) throws ParseException {
+	/**
+	 * Takes in an array of house sales and builds a Scatterplot graph from the array list
+	 * @param houseSales an array list of house sales that a graph will be built from
+	 * @return A chart panel that contains the built graph
+	 * @throws ParseException
+	 */
+	public static ChartPanel createGraph(ArrayList<HouseSale> houseSales) throws ParseException {
+		// Sale denotes what each point on the graph represents
 		XYSeries series = new XYSeries("Sale");
-	    XYSeriesCollection dataset = new XYSeriesCollection();
-
-		for(House house : houses) {
+		// I used a XYSeries instead of a TimeSeries because a TimeSeriesCollection doesn't allow for multiple entries on the x axis
+		// and more than one house sale could be done on the same day making it unsuitable
+	    XYSeriesCollection salesData = new XYSeriesCollection();
+	    
+		for(HouseSale house : houseSales) {
+			// Uses the year of sale for the graphs x axis and the price for the y axis
 			series.add(house.getYear(), house.getPrice());;
 			house.getYear();
 		}
 		
-		
-	    dataset.addSeries(series);
+	    salesData.addSeries(series);
+	    // Creates a graph with the title SEARCHTERM Price Trends, gets the search term from the index
+	    // Has a X Axis title of Date (Year)
+	    // Has a Y Axis title of Price (£)
+	    JFreeChart chart = ChartFactory.createScatterPlot(Index.searchTerm + " Price trends", "Date (Year)", "Price (£)", salesData);
+	    
+	    ChartPanel graph = new ChartPanel(chart);
 
-		   JFreeChart chart = ChartFactory.createScatterPlot(houses.get(0).getPostcode() + " Price trends", "Date (Year)", "Price (£)", dataset);
-		   ChartPanel CP = new ChartPanel(chart);
-
-		return CP;
+		return graph;
 
 	}
 }
